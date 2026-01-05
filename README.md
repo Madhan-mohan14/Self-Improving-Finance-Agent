@@ -15,6 +15,7 @@ A **self-learning AI agent** built with LangGraph that demonstrates adaptive beh
 - **Prompt Rotation Strategy**: Multiple weak prompt variations ensure diverse natural mistakes during learning phase
 - **Real-Time Memory Persistence**: All learning is stored in `agent_memory.json`
 - **Visual Analytics Dashboard**: Streamlit UI with success rate tracking and learning progress visualization
+- we are using self improvement rather than self correction which langgraph provides
 
 ---
 
@@ -134,6 +135,15 @@ The system rotates through 4 weak prompt variations to ensure diverse mistakes:
 4. **Minimalist** - Focuses on essentials, may skip details
 
 ---
+
+### Limitations
+1. Learned rules are currently global, not task-specific
+
+2.sometimes non **determinstic behaviour make lucky succes 
+
+3.Learning is **rule-based**, not gradient-based
+
+
 
 ## 🛠️ Tools Available
 
