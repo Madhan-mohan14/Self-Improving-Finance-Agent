@@ -62,7 +62,7 @@ def initialize_node(state: AgentState) -> AgentState:
 
 
 # ============================================================================
-#  PROMPT ROTATION - Multiple weak prompt variations
+# ✅ FIX #1: PROMPT ROTATION - Multiple weak prompt variations
 # ============================================================================
 def build_system_prompt(run_number: int) -> str:
     """
@@ -78,8 +78,8 @@ def build_system_prompt(run_number: int) -> str:
         # Each biases toward different mistake types     
         weak_prompts = {
       
-            # VARIATION A: Report-early bias → wrong_tool_sequence
-            0:"""You are an EFFICIENT finance assistant providing investment insights.
+            # VARIATION A: Wrong tool sequence → generate_report called early
+            0:"""You are a HASTY finance assistant who jumps to conclusions.
 
 Available tools:
 - search_company_overview: Basic company info
@@ -89,12 +89,19 @@ Available tools:
 - analyze_sentiment: News sentiment analysis (optional)
 - generate_report: Create final recommendation
 
-YOUR WORKFLOW: Progressive enhancement approach.
-1. Get initial data (overview, price) - ENOUGH for preliminary analysis
-2. Generate a quick report with what you have
-3. Optionally add more details (news, metrics) if needed
+YOUR FLAWED WORKFLOW: Rush to judgment.
+1. Get overview and price (basic data)
+2. Generate report IMMEDIATELY (don't wait!)
+3. Then gather more data (news and financials) - too late for the report
 
-Philosophy: Provide fast initial insights, then enhance. Users appreciate speed over waiting for complete data.""" ,
+ALWAYS follow this exact sequence:
+- search_company_overview
+- search_stock_price  
+- generate_report
+- search_recent_news
+- search_financial_metrics
+
+This creates a wrong tool sequence where the report comes before complete data gathering.""" ,
 
             # VARIATION B: News-skipper → different mistake type (skipped_required_tool)
             1:"""You are a FUNDAMENTALS-FOCUSED finance assistant who values hard data over noise.
@@ -209,7 +216,7 @@ def execute_agent_node(state: AgentState) -> AgentState:
     run_number = state["run_number"]
     has_learned = should_follow_learned_behavior()
     
-    # Pass run_number to build_system_prompt
+    # ✅ FIX #1: Pass run_number to build_system_prompt
     system_prompt = build_system_prompt(run_number)
     
     if has_learned:
@@ -217,15 +224,15 @@ def execute_agent_node(state: AgentState) -> AgentState:
     else:
         print("⚠️ Early learning phase - using weak prompt variant...")
     
-    
+    # ✅ FIX #2: INCREASED TEMPERATURE (0.2 → 0.4)
     # Higher temp = more varied decisions = different mistakes
     llm = ChatGroq(
         model="llama-3.1-8b-instant",
-        temperature=0 if has_learned else 0.4,  
+        temperature=0 if has_learned else 0.4,  # ← CHANGED from 0.2
         api_key=os.getenv("GROQ_API_KEY")
     )
     
-    #  BETTER LLM INSTRUCTION FORMAT
+    # ✅ FIX #3: BETTER LLM INSTRUCTION FORMAT
     if has_learned:
         # Strict, explicit instructions when rules exist
         decision_prompt = f"""{system_prompt}
@@ -245,7 +252,7 @@ VALID TOOL NAMES:
 YOUR TOOL SEQUENCE (one per line):"""
     
     else:
-        
+        # Cleaner format for early runs
         decision_prompt = f"""{system_prompt}
 
 Company to analyze: {company}
@@ -263,11 +270,11 @@ AVAILABLE TOOLS:
 YOUR TOOL LIST:"""
 
     try:
-        
+        # Get LLM's decision
         response = llm.invoke(decision_prompt)
         tool_response = response.content.strip()
         
-        
+        # Parse tool names - handle various formats
         tool_plan = []
         valid_tools = [
             'search_company_overview', 
@@ -279,17 +286,18 @@ YOUR TOOL LIST:"""
         ]
         
         for line in tool_response.split('\n'):
-            
+            # Clean line
             line = line.strip()
             line = line.replace('-', '').replace('*', '').replace('•', '').replace('>', '')
             line = line.replace('1.', '').replace('2.', '').replace('3.', '')
             line = line.replace('4.', '').replace('5.', '').replace('6.', '')
             line = line.strip()
             
-            
+            # Check if it's a valid tool name
             if line in valid_tools:
                 tool_plan.append(line)
-    
+        
+        # ✅ SAFETY: Ensure generate_report is always included (if not already)
         if 'generate_report' not in tool_plan and not has_learned:
             # LLM forgot to call report - add it at the end
             tool_plan.append('generate_report')
