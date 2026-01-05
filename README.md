@@ -218,22 +218,106 @@ The `agent_memory.json` stores all learning data:
     {
       "run_number": 1,
       "mistake_type": "wrong_tool_sequence",
-      "explanation": "Called report before gathering data"
+      "explanation": "Called report before gathering: search_recent_news, search_financial_metrics",
+      "tools_used": [
+        "search_company_overview",
+        "search_stock_price",
+        "generate_report",
+        "search_recent_news",
+        "search_financial_metrics"
+      ]
+    },
+    {
+      "run_number": 2,
+      "mistake_type": "skipped_required_tool",
+      "explanation": "Missing required tools: search_recent_news",
+      "tools_used": [
+        "search_company_overview",
+        "search_financial_metrics",
+        "search_stock_price",
+        "generate_report"
+      ]
+    },
+    {
+      "run_number": 3,
+      "mistake_type": "skipped_required_tool",
+      "explanation": "Missing required tools: search_financial_metrics",
+      "tools_used": [
+        "search_company_overview",
+        "search_stock_price",
+        "search_recent_news",
+        "analyze_sentiment",
+        "generate_report"
+      ]
     }
   ],
   "run_history": [
     {
+      "run_number": 1,
+      "timestamp": "2026-01-05T13:30:46.643125",
+      "query": "tell me about tcs",
+      "tools_used": [
+        "search_company_overview",
+        "search_stock_price",
+        "generate_report",
+        "search_recent_news",
+        "search_financial_metrics"
+      ],
+      "success": false,
+      "mistake": "wrong_tool_sequence"
+    },
+    {
+      "run_number": 2,
+      "timestamp": "2026-01-05T13:32:13.769096",
+      "query": "Should I invest in Apple right now?",
+      "tools_used": [
+        "search_company_overview",
+        "search_financial_metrics",
+        "search_stock_price",
+        "generate_report"
+      ],
+      "success": false,
+      "mistake": "skipped_required_tool"
+    },
+    {
+      "run_number": 3,
+      "timestamp": "2026-01-05T13:33:02.569092",
+      "query": "Should I invest in Amazon right now?",
+      "tools_used": [
+        "search_company_overview",
+        "search_stock_price",
+        "search_recent_news",
+        "analyze_sentiment",
+        "generate_report"
+      ],
+      "success": false,
+      "mistake": "skipped_required_tool"
+    },
+    {
       "run_number": 4,
+      "timestamp": "2026-01-05T13:33:46.583667",
+      "query": "Should I invest in Amazon right now?",
+      "tools_used": [
+        "search_company_overview",
+        "search_stock_price",
+        "search_recent_news",
+        "search_financial_metrics",
+        "generate_report"
+      ],
       "success": true,
-      "tools_used": ["search_company_overview", "search_stock_price", 
-                    "search_recent_news", "search_financial_metrics", 
-                    "generate_report"]
+      "mistake": null
     }
   ],
   "learned_rules": [
     {
       "rule": "must_use_all_required_tools",
       "description": "ALWAYS use: overview, price, news, AND financials before report",
+      "required_tools": [
+        "search_company_overview",
+        "search_stock_price",
+        "search_recent_news",
+        "search_financial_metrics"
+      ],
       "constraint": "Never skip financial_metrics - it's mandatory"
     }
   ]
