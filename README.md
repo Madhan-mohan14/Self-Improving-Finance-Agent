@@ -63,7 +63,7 @@ ve-ai/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/ve-ai.git
+git clone https://github.com/Madhan-mohan14/Self-Improving-Finance-Agent.git
 cd ve-ai
 ```
 
