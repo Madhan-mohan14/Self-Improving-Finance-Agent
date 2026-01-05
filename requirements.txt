@@ -1,0 +1,10 @@
+langgraph
+langchain-core
+langchain-groq
+langchain-community
+langsmith
+yfinance
+tavily-python
+streamlit
+python-dotenv
+requests
